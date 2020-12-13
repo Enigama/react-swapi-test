@@ -1,12 +1,34 @@
 import React, {useState, useEffect} from "react";
 import axios from 'axios';
 
+import usePlanet from "../../hooks/usePlanet";
 import {PEOPLE_URL} from "../../constant/API_URLS";
 
 import "./index.sass";
 
 const CharActer = ({match}) => {
+	const charActerId = match.params.slug;
+
 	const [charActer, setCharActer] = useState(null);
+	const [{planet, error}, doPlanet] = usePlanet(charActerId);
+
+	useEffect(() => {
+		if (!charActerId) return;
+
+		axios(`${PEOPLE_URL}${charActerId}`)
+			.then(({data}) => {
+				setCharActer(data)
+			})
+	}, [charActerId]);
+
+	useEffect(() => {
+		if (!charActer) return;
+
+		const {homeworld} = charActer;
+		if (!homeworld) return;
+
+		doPlanet();
+	}, [charActer, doPlanet]);
 
 	const showCharacter = () => {
 		const {
@@ -45,23 +67,24 @@ const CharActer = ({match}) => {
 						<div className="character__row">birth year: {birth_year}</div>
 						<div className="character__row">gender: {gender}</div>
 
-						<div className="character__row">{homeworld}</div>
-						<div className="character__row">{vehicles}</div>
+						{
+							homeworld && planet ?
+								<div className="character__row"> home world: {planet.name}</div>
+								:
+								null
+						}
+						{
+							vehicles ?
+								<div className="character__row">{vehicles}</div>
+								:
+								null
+						}
 						<div className="character__row">{films}</div>
 					</div>
 				</div>
 			</div>
 		)
 	};
-
-	useEffect(() => {
-		if (!match.params.slug) return;
-
-		axios(`${PEOPLE_URL}${match.params.slug}`)
-			.then(({data}) => {
-				setCharActer(data)
-			})
-	}, []);
 
 	return (
 		<div className="character">
