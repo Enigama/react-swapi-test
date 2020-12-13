@@ -6,6 +6,7 @@ import Routes from "./routes";
 import Header from "./components/header/header";
 
 import "./index.sass";
+import "./grid/grid.sass";
 
 const App = () => {
 	return (

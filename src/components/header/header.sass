@@ -3,7 +3,11 @@
   color: #000
   text-decoration: none
 
-  &:hover
+  &+&
+    margin-left: 10px
+
+  &:hover, &:focus
     color: blue
     text-decoration: none
+    cursor: pointer
     transition: color 0.3s

@@ -1,25 +1,26 @@
 import React, {useState, useEffect} from 'react';
+import {useHistory, Link} from 'react-router-dom';
 import axios from 'axios';
 import 'react-perfect-scrollbar/dist/css/styles.css';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import Select from 'react-select';
-import throttle from "lodash-es/throttle";
+import debounce from "lodash-es/debounce";
 
 import "./Card.sass";
 import Spinner from "../../components/spinner/Spinner";
+import {PEOPLE_URL, PLANET_URL} from "../../constant/API_URLS";
+import {CHAR_ACTER_URL} from "../../constant/ROUTE_NAMES";
 
 const Main = () => {
-	const API_URL = 'https://swapi.dev/api';
-	const API_PLANET_URL = 'http://swapi.dev/api/planets';
-
+	let history = useHistory();
 	const [paginatorNext, setPaginatorNext] = useState('');
 	const [endPaginator, setEndPaginator] = useState(false);
 	const [people, setPeople] = useState([]);
 	const [planetsIds, setPlanetsIds] = useState([]);
 	const [planetsNames, setPlanetsNames] = useState([]);
 
-	const changeSelect = (e) => {
-		console.log(e);
+	const changeSelect = ({charActerId}) => {
+		history.push(`${CHAR_ACTER_URL}/${charActerId}`)
 	};
 
 	const getSelectOptions = () => {
@@ -53,8 +54,7 @@ const Main = () => {
 		})
 	};
 
-	const loadCharActers = url => {
-		console.log('load');
+	const loadCharActers = debounce(url => {
 		if (endPaginator) return;
 
 		axios(url)
@@ -72,10 +72,10 @@ const Main = () => {
 			.catch(error => {
 				console.log(error);
 			})
-	};
+	}, 300);
 
 	useEffect(() => {
-		loadCharActers(`${API_URL}/people/`)
+		loadCharActers(PEOPLE_URL)
 	}, []);
 
 	useEffect(() => {
@@ -101,7 +101,7 @@ const Main = () => {
 
 		planetsIds.forEach(id => {
 			if (planetsNames.some(({url}) => getIdFromUrl(url) !== id) || !planetsNames.length) {
-				promises.push(axios(`${API_PLANET_URL}/${id}`));
+				promises.push(axios(`${PLANET_URL}/${id}`));
 			}
 		});
 
@@ -124,7 +124,7 @@ const Main = () => {
 
 	return (
 		<div className="main-page">
-			<div className="main-page__container">
+			<div className="custom-container">
 				<h3 className="card-headline">Characters list</h3>
 				{
 					people.length ?
@@ -136,8 +136,8 @@ const Main = () => {
 
 								<PerfectScrollbar onYReachEnd={() => loadCharActers(paginatorNext)} className="card-list">
 									{
-										people.map(({name, gender, homeworld}, index) => (
-											<a href="#" className="card card-link" key={name}>
+										people.map(({name, gender, homeworld, url}, index) => (
+											<Link to={`${CHAR_ACTER_URL}/${getIdFromUrl(url)}`} className="card card-link" key={name}>
 												<div className="card-body">
 													<h5 className="card-title">
 														<span className="card-desc">name</span>: {name}
@@ -149,7 +149,7 @@ const Main = () => {
 														<span className="card-desc">home world:</span> {getPlanet(getIdFromUrl(homeworld))}
 													</p>
 												</div>
-											</a>
+											</Link>
 										))
 									}
 								</PerfectScrollbar>
