@@ -95,7 +95,6 @@ const Main = () => {
 		})
 	}, [people]);
 
-	//todo fix error duplicate items after request!
 	useEffect(() => {
 		const promises = [];
 
@@ -108,16 +107,13 @@ const Main = () => {
 		Promise.all(promises)
 			.then((res) => {
 				if (!res.length) return;
+				const planets = res.map(({data}) => data);
 
-				res.forEach(({data}) => {
-					const {name} = data;
-
-					if (!name) {
-						return;
+				setPlanetsNames((prevState) => {
+					if (prevState !== planets) {
+						return [...prevState, ...planets]
 					}
-					setPlanetsNames((prevState) => {
-						return [...prevState, {...data}]
-					})
+					return prevState
 				})
 			})
 	}, [planetsIds]);
@@ -137,7 +133,7 @@ const Main = () => {
 								<PerfectScrollbar onYReachEnd={() => loadCharActers(paginatorNext)} className="card-list">
 									{
 										people.map(({name, gender, homeworld, url}, index) => (
-											<Link to={`${CHAR_ACTER_URL}/${getIdFromUrl(url)}`} className="card card-link" key={name}>
+											<Link to={`${CHAR_ACTER_URL}/${getIdFromUrl(url)}`} className="card card-link" key={index}>
 												<div className="card-body">
 													<h5 className="card-title">
 														<span className="card-desc">name</span>: {name}

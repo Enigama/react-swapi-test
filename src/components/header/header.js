@@ -23,7 +23,6 @@ const Header = () => {
 						:
 						<FacebookLogin appId="462100531624118"
 													 render={renderProps => (
-														 // <button onClick={renderProps.onClick}>This is my custom FB button</button>
 														 <div className="header__link" onClick={renderProps.onClick}>
 															 <img src={fb} alt="" width="24" height="24"
 																		className="d-inline-block align-center header__icon"/>
