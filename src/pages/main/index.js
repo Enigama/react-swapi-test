@@ -153,7 +153,7 @@ const Main = () => {
 
 								<PerfectScrollbar onYReachEnd={() => loadCharActers(paginatorNext)} className="card-list">
 									{
-										people.map(({name, gender, homeworld, url}, index) => (
+										people.map(({name, gender, homeworld, url}) => (
 											<div className="card" key={name}>
 												<Link to={`${CHAR_ACTER_URL}/${getIdFromUrl(url)}`} className="card-link">
 													<div className="card-body">
