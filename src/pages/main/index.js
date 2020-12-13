@@ -1,10 +1,10 @@
-import React, {useState, useEffect} from 'react';
-import {useHistory, Link} from 'react-router-dom';
+import React, {useEffect, useState} from 'react';
+import {Link, useHistory} from 'react-router-dom';
 import axios from 'axios';
 import 'react-perfect-scrollbar/dist/css/styles.css';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import Select from 'react-select';
-import debounce from "lodash-es/debounce";
+import difference from "lodash-es/difference";
 
 import "./Card.sass";
 import Spinner from "../../components/spinner/Spinner";
@@ -16,6 +16,7 @@ const Main = () => {
 	const [paginatorNext, setPaginatorNext] = useState('');
 	const [endPaginator, setEndPaginator] = useState(false);
 	const [people, setPeople] = useState([]);
+	const [isLoading, setIsLoading] = useState(false);
 	const [planetsIds, setPlanetsIds] = useState([]);
 	const [planetsNames, setPlanetsNames] = useState([]);
 
@@ -49,30 +50,36 @@ const Main = () => {
 	const getUniqPlanet = (prevPlanetsIds, id) => {
 		if (!prevPlanetsIds.length) return false;
 
-		return prevPlanetsIds.some(pId => {
-			return pId === id
+		return prevPlanetsIds.some(({url}) => {
+			return getIdFromUrl(url) === id
 		})
 	};
 
-	const loadCharActers = debounce(url => {
-		if (endPaginator) return;
+	const loadCharActers = url => {
+		if (endPaginator || isLoading) return;
+		setIsLoading(true);
 
 		axios(url)
 			.then(({data}) => {
 				if (!data.results) return;
 
 				const {results, next} = data;
-				if (!next) setEndPaginator(true);
+				if (!next) {
+					setEndPaginator(true)
+				}
+				setPaginatorNext(next);
 
 				setPeople((prevState) => {
 					return [...prevState, ...results]
 				});
-				setPaginatorNext(next)
+
+				setIsLoading(false);
 			})
 			.catch(error => {
 				console.log(error);
-			})
-	}, 300);
+				setIsLoading(false);
+			});
+	};
 
 	useEffect(() => {
 		loadCharActers(PEOPLE_URL)
@@ -81,18 +88,24 @@ const Main = () => {
 	useEffect(() => {
 		if (!people.length) return;
 
-		people.forEach(({homeworld}) => {
-			if (!homeworld) return;
+		const homeWorldIds = [ ...new Set(people.map(({homeworld}) => getIdFromUrl(homeworld)))];
 
-			const id = getIdFromUrl(homeworld);
+		setPlanetsIds((prevState => {
+			return difference(homeWorldIds, prevState)
+		}));
 
-			setPlanetsIds(prevState => {
-				if (!getUniqPlanet(prevState, id)) {
-					return [...prevState, id]
-				}
-				return prevState
-			})
-		})
+
+		// people.forEach(({homeworld}) => {
+		// 	if (!homeworld) return;
+		// 	const id = getIdFromUrl(homeworld);
+		//
+		// 	setPlanetsIds(prevState => {
+		// 		if (!getUniqPlanet(prevState, id)) {
+		// 			return [...prevState, id]
+		// 		}
+		// 		return prevState
+		// 	})
+		// })
 	}, [people]);
 
 	useEffect(() => {
@@ -133,7 +146,7 @@ const Main = () => {
 								<PerfectScrollbar onYReachEnd={() => loadCharActers(paginatorNext)} className="card-list">
 									{
 										people.map(({name, gender, homeworld, url}, index) => (
-											<Link to={`${CHAR_ACTER_URL}/${getIdFromUrl(url)}`} className="card card-link" key={index}>
+											<Link to={`${CHAR_ACTER_URL}/${getIdFromUrl(url)}`} className="card card-link" key={name}>
 												<div className="card-body">
 													<h5 className="card-title">
 														<span className="card-desc">name</span>: {name}
@@ -148,11 +161,12 @@ const Main = () => {
 											</Link>
 										))
 									}
+									{ isLoading ? <Spinner/> : null}
 								</PerfectScrollbar>
 							</>
 						)
 						:
-						<Spinner/>
+						null
 				}
 			</div>
 		</div>
