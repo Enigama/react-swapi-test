@@ -8,7 +8,6 @@ import "./index.sass";
 
 const CharActer = ({match}) => {
 	const charActerId = match.params.slug;
-
 	const [charActer, setCharActer] = useState(null);
 	const [{planet, error}, doPlanet] = usePlanet(charActerId);
 	const [vehiclesList, setVehiclesList] = useState([]);
@@ -20,7 +19,8 @@ const CharActer = ({match}) => {
 		axios(`${PEOPLE_URL}${charActerId}`)
 			.then(({data}) => {
 				setCharActer(data)
-			})
+			});
+
 	}, [charActerId]);
 
 	useEffect(() => {
@@ -71,7 +71,6 @@ const CharActer = ({match}) => {
 		}
 	}, [charActer]);
 
-
 	const showCharacter = () => {
 		const {
 			name,
@@ -97,7 +96,10 @@ const CharActer = ({match}) => {
 								hair color: <span style={{color: hair_color}}>{hair_color}</span>
 							</div>
 							<div className="character__appearance">
-								skin color: <span style={{color: skin_color, backgroundColor: skin_color === 'white' ? '#d0d0d0' : 'transparent'}}>{skin_color}</span>
+								skin color: <span style={{
+								color: skin_color,
+								backgroundColor: skin_color === 'white' ? '#d0d0d0' : 'transparent'
+							}}>{skin_color}</span>
 							</div>
 							<div className="character__appearance">
 								eye color: <span style={{color: eye_color}}>{eye_color}</span>
@@ -133,7 +135,7 @@ const CharActer = ({match}) => {
 							films: {
 							filmsList.map(({title}, index) => (
 									<span key={title}>
-										{title} {(index !== filmsList.length - 1) ? ', ' : null}
+										{title}{(index !== filmsList.length - 1) ? ', ' : null}
 									</span>
 								)
 							)}

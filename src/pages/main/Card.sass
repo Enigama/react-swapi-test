@@ -22,5 +22,20 @@
 .card-title, .card-content
   color: #000b
 
+.card-content
+  margin-bottom: 0
+
+  &+&
+    margin-top: 10px
+
 .card-desc
   color: #9a7f7f
+
+.card-like
+  position: absolute
+  right: 10px
+  bottom: 10px
+  user-select: none
+
+  &:hover
+    cursor: pointer
