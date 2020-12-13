@@ -3,7 +3,7 @@ import axios from 'axios';
 import {PLANET_URL} from "../constant/API_URLS";
 
 export default id => {
-	const [planet, setPlanet] = useState([]);
+	const [planet, setPlanet] = useState(null);
 	const [error, setError] = useState(null);
 	const [isLoading, setIsLoading] = useState(false);
 

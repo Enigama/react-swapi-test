@@ -11,6 +11,8 @@ const CharActer = ({match}) => {
 
 	const [charActer, setCharActer] = useState(null);
 	const [{planet, error}, doPlanet] = usePlanet(charActerId);
+	const [vehiclesList, setVehiclesList] = useState([]);
+	const [filmsList, setFilmsList] = useState([]);
 
 	useEffect(() => {
 		if (!charActerId) return;
@@ -25,10 +27,50 @@ const CharActer = ({match}) => {
 		if (!charActer) return;
 
 		const {homeworld} = charActer;
-		if (!homeworld) return;
+		if (homeworld) {
+			doPlanet();
+		}
 
-		doPlanet();
 	}, [charActer, doPlanet]);
+
+	useEffect(() => {
+		if (!charActer) return;
+
+		const {vehicles, films} = charActer;
+
+		if (vehicles) {
+			const promises = [];
+
+			vehicles.forEach(url => {
+				promises.push(axios(url))
+			});
+
+			Promise.all(promises)
+				.then(res => {
+					res.forEach(({data}) => {
+						const {name, model} = data;
+						setVehiclesList(prevState => [...prevState, {name, model}])
+					})
+				})
+		}
+
+		if (films) {
+			const promises = [];
+
+			films.forEach(url => {
+				promises.push(axios(url))
+			});
+
+			Promise.all(promises)
+				.then(res => {
+					res.forEach(({data}) => {
+						const {title} = data;
+						setFilmsList(prevState => [...prevState, data])
+					})
+				})
+		}
+	}, [charActer]);
+
 
 	const showCharacter = () => {
 		const {
@@ -57,7 +99,7 @@ const CharActer = ({match}) => {
 								hair color: <span style={{color: hair_color}}>{hair_color}</span>
 							</div>
 							<div className="character__appearance">
-								skin color: <span style={{color: skin_color}}>{skin_color}</span>
+								skin color: <span style={{color: skin_color, backgroundColor: skin_color === 'white' ? '#d0d0d0' : 'transparent'}}>{skin_color}</span>
 							</div>
 							<div className="character__appearance">
 								eye color: <span style={{color: eye_color}}>{eye_color}</span>
@@ -74,12 +116,30 @@ const CharActer = ({match}) => {
 								null
 						}
 						{
-							vehicles ?
-								<div className="character__row">{vehicles}</div>
+							vehiclesList.length ?
+								<div className="character__row">
+									vehicles
+									{
+										vehiclesList.map(({name, model}) => (
+											<div key={name}>
+												<div>name: {name}</div>
+												<div>model: {model}</div>
+											</div>
+										))
+									}
+								</div>
 								:
 								null
 						}
-						<div className="character__row">{films}</div>
+						<div className="character__row">
+							films: {
+							filmsList.map(({title}, index) => (
+									<span key={title}>
+										{title} {(index !== filmsList.length - 1) ? ', ' : null}
+									</span>
+								)
+							)}
+						</div>
 					</div>
 				</div>
 			</div>
