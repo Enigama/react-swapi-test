@@ -15,34 +15,44 @@ const CharActer = ({match}) => {
 
 	useEffect(() => {
 		if (!charActerId) return;
+		const source = axios.CancelToken.source();
 
-		axios(`${PEOPLE_URL}${charActerId}`)
+		axios(`${PEOPLE_URL}${charActerId}`, {
+			cancelToken: source.token
+		})
 			.then(({data}) => {
 				setCharActer(data)
 			});
 
+		return () => source.cancel();
 	}, [charActerId]);
 
 	useEffect(() => {
 		if (!charActer) return;
 
 		const {homeworld} = charActer;
-		if (homeworld) {
+		let mounted = true;
+
+		if (homeworld && mounted) {
 			doPlanet();
 		}
 
+		return () => mounted = false;
 	}, [charActer, doPlanet]);
 
 	useEffect(() => {
 		if (!charActer) return;
 
+		const source = axios.CancelToken.source();
 		const {vehicles, films} = charActer;
 
 		if (vehicles) {
 			const promises = [];
 
 			vehicles.forEach(url => {
-				promises.push(axios(url))
+				promises.push(axios(url, {
+					cancelToken: source.token
+				}))
 			});
 
 			Promise.all(promises)
@@ -58,17 +68,20 @@ const CharActer = ({match}) => {
 			const promises = [];
 
 			films.forEach(url => {
-				promises.push(axios(url))
+				promises.push(axios(url, {
+					cancelToken: source.token
+				}))
 			});
 
 			Promise.all(promises)
 				.then(res => {
 					res.forEach(({data}) => {
-						const {title} = data;
 						setFilmsList(prevState => [...prevState, data])
 					})
 				})
 		}
+
+		return () => source.cancel();
 	}, [charActer]);
 
 	const showCharacter = () => {

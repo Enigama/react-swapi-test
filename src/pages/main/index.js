@@ -107,10 +107,13 @@ const Main = () => {
 
 	useEffect(() => {
 		const promises = [];
+		const source = axios.CancelToken.source();
 
 		planetsIds.forEach(id => {
 			if (planetsNames.some(({url}) => getIdFromUrl(url) !== id) || !planetsNames.length) {
-				promises.push(axios(`${PLANET_URL}/${id}`));
+				promises.push(axios(`${PLANET_URL}/${id}`, {
+					cancelToken: source.token
+				}));
 			}
 		});
 
@@ -125,7 +128,9 @@ const Main = () => {
 					}
 					return prevState
 				})
-			})
+			});
+
+		return () => source.cancel();
 	}, [planetsIds]);
 
 	useEffect(() => {

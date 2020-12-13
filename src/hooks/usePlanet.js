@@ -14,16 +14,21 @@ export default id => {
 
 	useEffect(() => {
 		if (!isLoading) return;
+		const source = axios.CancelToken.source();
 
-		axios(`${PLANET_URL}/${id}`)
+		axios(`${PLANET_URL}/${id}`, {
+			cancelToken: source.token
+		})
 			.then(({data}) => {
 				setPlanet(data);
 				setIsLoading(false);
 			})
-			.catch(({response: {data}}) => {
-				setError(data);
+			.catch(({response}) => {
+				setError(response);
 				setIsLoading(false);
-			})
+			});
+
+		return () => source.cancel()
 	}, [id, isLoading]);
 
 	return [{planet, error}, doPlanet]
