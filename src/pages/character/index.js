@@ -83,8 +83,6 @@ const CharActer = ({match}) => {
 			birth_year,
 			gender,
 			homeworld,
-			vehicles,
-			films
 		} = charActer;
 		return (
 			<div className="character-block">
