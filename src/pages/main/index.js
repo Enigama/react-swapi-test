@@ -6,7 +6,7 @@ import PerfectScrollbar from 'react-perfect-scrollbar';
 import Select from 'react-select';
 import difference from "lodash-es/difference";
 
-import "./Card.sass";
+import "./index.sass";
 import Spinner from "../../components/spinner/Spinner";
 import {PEOPLE_URL, PLANET_URL} from "../../constant/API_URLS";
 import {CHAR_ACTER_URL} from "../../constant/ROUTE_NAMES";
@@ -92,6 +92,8 @@ const Main = () => {
 	useEffect(() => {
 		loadCharActers(PEOPLE_URL);
 		const likes = JSON.parse(localStorage.getItem('like'));
+
+		if (!likes) return;
 		likes.forEach(({id}) => updateLike(id));
 	}, []);
 
@@ -167,7 +169,8 @@ const Main = () => {
 													</div>
 												</Link>
 												<div className="card-like" onClick={() => updateLike(getIdFromUrl(url))}>
-													<LikeIcon width={15} fill={like.some(({id}) => id === getIdFromUrl(url)) ? '#0d6efd' : '#000'}/>
+													<LikeIcon width={15}
+																		fill={like.some(({id}) => id === getIdFromUrl(url)) ? '#0d6efd' : '#000'}/>
 												</div>
 											</div>
 										))
