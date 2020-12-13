@@ -2,6 +2,7 @@ import React, {useState, useEffect} from 'react';
 import axios from 'axios';
 import 'react-perfect-scrollbar/dist/css/styles.css';
 import PerfectScrollbar from 'react-perfect-scrollbar';
+import Select from 'react-select';
 import throttle from "lodash-es/throttle";
 
 import "./Card.sass";
@@ -17,27 +18,19 @@ const Main = () => {
 	const [planetsIds, setPlanetsIds] = useState([]);
 	const [planetsNames, setPlanetsNames] = useState([]);
 
-	// const setPlanets = throttle(id => {
-	// 	axios(`${API_PLANET_URL}/${id}`)
-	// 		.then(({data}) => {
-	// 			const {name} = data;
-	//
-	// 			if (!name) {
-	// 				setPlanetsNames((prevState) => prevState);
-	// 				return;
-	// 			}
-	// 			setPlanetsNames((prevState) => {
-	// 				return [...prevState, {...data}]
-	// 			})
-	// 		})
-	// 		.catch((error) => console.log(error))
-	// }, 300);
+	const changeSelect = (e) => {
+		console.log(e);
+	};
+
+	const getSelectOptions = () => {
+		return people.map(({name, url}) => ({value: name, label: name, charActerId: getIdFromUrl(url)}))
+	};
 
 	const getPlanet = (id) => {
 		const notFoundPlanet = 'not found';
 
 		const planet = planetsNames.find(({name, url}) => {
-			return getPlanetId(url) === id
+			return getIdFromUrl(url) === id
 		});
 
 		if (!planet) return notFoundPlanet;
@@ -47,7 +40,7 @@ const Main = () => {
 		return name
 	};
 
-	const getPlanetId = url => {
+	const getIdFromUrl = url => {
 		const params = url.split('/');
 		return Number(params[params.length - 2]);
 	};
@@ -91,7 +84,7 @@ const Main = () => {
 		people.forEach(({homeworld}) => {
 			if (!homeworld) return;
 
-			const id = getPlanetId(homeworld);
+			const id = getIdFromUrl(homeworld);
 
 			setPlanetsIds(prevState => {
 				if (!getUniqPlanet(prevState, id)) {
@@ -102,11 +95,12 @@ const Main = () => {
 		})
 	}, [people]);
 
+	//todo fix error duplicate items after request!
 	useEffect(() => {
 		const promises = [];
 
 		planetsIds.forEach(id => {
-			if (planetsNames.some(({url}) => getPlanetId(url) !== id) || !planetsNames.length) {
+			if (planetsNames.some(({url}) => getIdFromUrl(url) !== id) || !planetsNames.length) {
 				promises.push(axios(`${API_PLANET_URL}/${id}`));
 			}
 		});
@@ -134,25 +128,33 @@ const Main = () => {
 				<h3 className="card-headline">Characters list</h3>
 				{
 					people.length ?
-						<PerfectScrollbar onYReachEnd={() => loadCharActers(paginatorNext)} className="card-list">
-							{
-								people.map(({name, gender, homeworld}, index) => (
-									<a href="#" className="card card-link" key={name}>
-										<div className="card-body">
-											<h5 className="card-title">
-												<span className="card-desc">name</span>: {name}
-											</h5>
-											<p className="card-content">
-												<span className="card-desc">gender:</span> {gender}
-											</p>
-											<p className="card-content">
-												<span className="card-desc">home world:</span> {getPlanet(getPlanetId(homeworld))}
-											</p>
-										</div>
-									</a>
-								))
-							}
-						</PerfectScrollbar>
+						(
+							<>
+								<div className="card-search">
+									<Select options={getSelectOptions()} onChange={changeSelect}/>
+								</div>
+
+								<PerfectScrollbar onYReachEnd={() => loadCharActers(paginatorNext)} className="card-list">
+									{
+										people.map(({name, gender, homeworld}, index) => (
+											<a href="#" className="card card-link" key={name}>
+												<div className="card-body">
+													<h5 className="card-title">
+														<span className="card-desc">name</span>: {name}
+													</h5>
+													<p className="card-content">
+														<span className="card-desc">gender:</span> {gender}
+													</p>
+													<p className="card-content">
+														<span className="card-desc">home world:</span> {getPlanet(getIdFromUrl(homeworld))}
+													</p>
+												</div>
+											</a>
+										))
+									}
+								</PerfectScrollbar>
+							</>
+						)
 						:
 						<Spinner/>
 				}
